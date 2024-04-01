@@ -8,5 +8,10 @@
 		"start": "node server.js"
 	},
 	"author": "",
-	"license": "MIT"
+	"license": "MIT",
+	"dependencies": {
+		"@apollo/client": "^3.9.9",
+		"cross-fetch": "^4.0.0",
+		"graphql": "^16.8.1"
+	}
 }
