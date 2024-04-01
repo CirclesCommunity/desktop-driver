@@ -1,3 +1,4 @@
+import { MachineResponse } from "@/types/graphql-types/machine";
 import {
 	LabTest,
 	MessageDelimiters,
@@ -8,6 +9,7 @@ import {
 	PV1ObjectType,
 } from "../types/HL7Types";
 import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7";
+import { sendMachineResponse } from "../api/mutate/sendResultInputs";
 
 function formatMachineDate(machineDate: string) {
 	// machineDate = YYYYMMDDHHMMSS
@@ -108,7 +110,7 @@ const readOBR = (HL7OBR: string, fieldDelimiter: string): OBRObjectType => {
 	const obrObject = {
 		fieldSeparator: fields[1],
 		encodingCharacters: fields[2],
-		fieldOrderNumber: fields[3],
+		sampleId: fields[3],
 		universalServiceIdentifier: fields[4],
 		dateTimeOfCollection: fields[6],
 		dateTimeOfAnalysis: fields[7],
@@ -159,7 +161,9 @@ const readPV1 = (HL7PV1: string, fieldDelimiter: string): PV1ObjectType => {
 	return PV1Object;
 };
 
-function parseLabTestResultHL7(HL7Message: string) {
+const getGlobalIdFromMachineId = (id: string): string => id;
+
+export function parseAndSendLabTestResultHL7(HL7Message: string) {
 	// Split the message into segments
 	const segments = HL7Message.split("\r");
 	const fieldDelimiter = getFieldDelimiter(HL7Message);
@@ -215,6 +219,17 @@ function parseLabTestResultHL7(HL7Message: string) {
 				break;
 		}
 	});
+
+	if (labTestResult.OBR.sampleId) {
+		const responses: MachineResponse["responses"] = [];
+		labTestResult.OBX.forEach((obx) => {
+			responses.push({
+				globalId: getGlobalIdFromMachineId(obx.observationIdentifier),
+				value: obx.observationValue,
+			});
+		});
+		sendMachineResponse({ responses, branchId: "123", requirementId: 2 });
+	}
 
 	return labTestResult;
 }

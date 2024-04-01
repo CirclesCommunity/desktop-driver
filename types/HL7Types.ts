@@ -31,7 +31,7 @@ export type MSHObjectType = {
 export type OBRObjectType = {
 	fieldSeparator: string;
 	encodingCharacters: string;
-	fieldOrderNumber: string;
+	sampleId: string;
 	universalServiceIdentifier: string;
 	dateTimeOfCollection: string; // Optional since it skips fields[5]
 	dateTimeOfAnalysis: string; // Optional since it skips fields[5] through fields[6]

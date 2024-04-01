@@ -28,7 +28,7 @@ export const emptyPV1 = {
 export const emptyOBR = {
     fieldSeparator: "",
     encodingCharacters: "",
-    fieldOrderNumber: "",
+    sampleId: "",
     universalServiceIdentifier: "",
     dateTimeOfCollection: "",
     dateTimeOfAnalysis: "",

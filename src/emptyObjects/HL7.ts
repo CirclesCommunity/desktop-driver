@@ -38,7 +38,7 @@ export const emptyPV1: PV1ObjectType = {
 export const emptyOBR: OBRObjectType = {
 	fieldSeparator: "",
 	encodingCharacters: "",
-	fieldOrderNumber: "",
+	sampleId: "",
 	universalServiceIdentifier: "",
 	dateTimeOfCollection: "",
 	dateTimeOfAnalysis: "",

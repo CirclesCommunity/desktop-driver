@@ -68,7 +68,7 @@ const readOBR = (HL7OBR, fieldDelimiter) => {
     const obrObject = {
         fieldSeparator: fields[1],
         encodingCharacters: fields[2],
-        fieldOrderNumber: fields[3],
+        sampleId: fields[3],
         universalServiceIdentifier: fields[4],
         dateTimeOfCollection: fields[6],
         dateTimeOfAnalysis: fields[7],
@@ -115,7 +115,8 @@ const readPV1 = (HL7PV1, fieldDelimiter) => {
     };
     return PV1Object;
 };
-function parseLabTestResultHL7(HL7Message) {
+const getGlobalIdFromMachineId = (id) => id;
+export function parseAndSendLabTestResultHL7(HL7Message) {
     // Split the message into segments
     const segments = HL7Message.split("\r");
     const fieldDelimiter = getFieldDelimiter(HL7Message);
@@ -159,5 +160,14 @@ function parseLabTestResultHL7(HL7Message) {
                 break;
         }
     });
+    if (labTestResult.OBR.sampleId) {
+        const responses = [];
+        labTestResult.OBX.forEach((obx) => {
+            responses.push({
+                globalId: getGlobalIdFromMachineId(obx.observationIdentifier),
+                value: obx.observationValue,
+            });
+        });
+    }
     return labTestResult;
 }
