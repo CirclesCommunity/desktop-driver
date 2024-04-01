@@ -20,7 +20,10 @@ export const sendMachineResponse = async (
 
 	if (result.errors) {
 		console.error(result.errors);
+		return undefined;
 	}
+
+	console.log("✅✅✅✅✅✅ RESULT SENT SUCCESSFULLY ✅✅✅✅✅✅");
 
 	return result.data;
 };
