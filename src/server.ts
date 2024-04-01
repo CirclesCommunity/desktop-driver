@@ -1,8 +1,8 @@
-const net = require("net");
+import net from "net";
 const port = 7070;
 const host = "127.0.0.1";
 
-let sockets = [];
+let sockets: net.Socket[] = [];
 
 const server = net.createServer((socket) => {
 	console.log("Client connected");

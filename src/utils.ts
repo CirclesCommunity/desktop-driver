@@ -1,4 +1,15 @@
-function formatMachineDate(machineDate) {
+import {
+	LabTest,
+	MessageDelimiters,
+	MSHObjectType,
+	OBRObjectType,
+	OBXObjectType,
+	PIDObjectType,
+	PV1ObjectType,
+} from "../types/HL7Types";
+import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7";
+
+function formatMachineDate(machineDate: string) {
 	// machineDate = YYYYMMDDHHMMSS
 	const formattedDate =
 		machineDate.slice(0, 4) +
@@ -15,12 +26,12 @@ function formatMachineDate(machineDate) {
 	return formattedDate;
 }
 
-function getFieldDelimiter(HL7Message) {
+function getFieldDelimiter(HL7Message: string) {
 	const fieldDelimiter = HL7Message.charAt(3);
 	return fieldDelimiter;
 }
 
-function getDelimiters(encodingCharacters) {
+function getDelimiters(encodingCharacters: string): MessageDelimiters {
 	const delimiters = {
 		componentDelimiter: encodingCharacters[0],
 		repetitionDelimiter: encodingCharacters[1],
@@ -30,39 +41,42 @@ function getDelimiters(encodingCharacters) {
 	return delimiters;
 }
 
-function decodeFieldEscapedDelimiters(HL7Field, delimiters) {
-	const decodedField = HL7Field.replaceALL(
+function decodeFieldEscapedDelimiters(
+	HL7Field: string,
+	delimiters: MessageDelimiters
+): string {
+	const decodedField = HL7Field.replaceAll(
 		delimiters.escapeDelimiter + "F" + delimiters.escapeDelimiter,
-		delimiters.fieldDelimiter
+		delimiters.fieldDelimiter || "|"
 	)
-		.replaceALL(
+		.replaceAll(
 			delimiters.escapeDelimiter + "S" + delimiters.escapeDelimiter,
 			delimiters.componentDelimiter
 		)
-		.replaceALL(
+		.replaceAll(
 			delimiters.escapeDelimiter + "T" + delimiters.escapeDelimiter,
 			delimiters.subcomponentDelimiter
 		)
-		.replaceALL(
+		.replaceAll(
 			delimiters.escapeDelimiter + "R" + delimiters.escapeDelimiter,
 			delimiters.repetitionDelimiter
 		)
-		.replaceALL(
+		.replaceAll(
 			delimiters.escapeDelimiter + "R" + delimiters.escapeDelimiter,
 			delimiters.repetitionDelimiter
 		)
-		.replaceALL(
+		.replaceAll(
 			delimiters.escapeDelimiter + "E" + delimiters.escapeDelimiter,
 			delimiters.escapeDelimiter
 		)
-		.replaceALL(
+		.replaceAll(
 			delimiters.escapeDelimiter + ".br" + delimiters.escapeDelimiter,
 			"\r"
 		);
 	return decodedField;
 }
 
-const readMSH = (HL7MSH) => {
+const readMSH = (HL7MSH: string): MSHObjectType => {
 	const fieldDelimiter = getFieldDelimiter(HL7MSH);
 	const fields = HL7MSH.split(fieldDelimiter);
 	const mshObject = {
@@ -89,7 +103,7 @@ const readMSH = (HL7MSH) => {
 	return mshObject;
 };
 
-const readOBR = (HL7OBR, fieldDelimiter) => {
+const readOBR = (HL7OBR: string, fieldDelimiter: string): OBRObjectType => {
 	const fields = HL7OBR.split(fieldDelimiter);
 	const obrObject = {
 		fieldSeparator: fields[1],
@@ -107,7 +121,7 @@ const readOBR = (HL7OBR, fieldDelimiter) => {
 	return obrObject;
 };
 
-const readOBX = (HL7OBX, fieldDelimiter) => {
+const readOBX = (HL7OBX: string, fieldDelimiter: string): OBXObjectType => {
 	const fields = HL7OBX.split(fieldDelimiter);
 	const obxObject = {
 		fieldId: fields[1],
@@ -123,7 +137,7 @@ const readOBX = (HL7OBX, fieldDelimiter) => {
 	return obxObject;
 };
 
-const readPID = (HL7PID, fieldDelimiter) => {
+const readPID = (HL7PID: string, fieldDelimiter: string): PIDObjectType => {
 	const fields = HL7PID.split(fieldDelimiter);
 	const pIDObject = {
 		serialNumber: fields[1],
@@ -135,7 +149,7 @@ const readPID = (HL7PID, fieldDelimiter) => {
 	return pIDObject;
 };
 
-const readPV1 = (HL7PV1, fieldDelimiter) => {
+const readPV1 = (HL7PV1: string, fieldDelimiter: string): PV1ObjectType => {
 	const fields = HL7PV1.split(fieldDelimiter);
 	const PV1Object = {
 		serialNumber: fields[1],
@@ -145,20 +159,19 @@ const readPV1 = (HL7PV1, fieldDelimiter) => {
 	return PV1Object;
 };
 
-function parseLabTestResultHL7(HL7Message) {
+function parseLabTestResultHL7(HL7Message: string) {
 	// Split the message into segments
 	const segments = HL7Message.split("\r");
 	const fieldDelimiter = getFieldDelimiter(HL7Message);
 
 	// Initialize the result object
-	let labTestResult = {
-		MSH: {},
-		PID: {}, // Initialize PID object
-		PV1: {}, // Initialize PV1 object
-		OBR: {},
+	let labTestResult: LabTest = {
+		MSH: { ...emptyMSH },
+		PID: { ...emptyPID }, // Initialize PID object
+		PV1: { ...emptyPV1 }, // Initialize PV1 object
+		OBR: { ...emptyOBR },
 		OBX: [],
 	};
-
 	segments.forEach((segment) => {
 		const segmentType = segment.substring(0, 3);
 		switch (segmentType) {
@@ -194,7 +207,7 @@ function parseLabTestResultHL7(HL7Message) {
 				// Decode potentially escaped delimiters in OBX observation values
 				obx.observationValue = decodeFieldEscapedDelimiters(
 					obx.observationValue,
-					delimiters
+					getDelimiters(labTestResult.MSH.encodingCharacters)
 				);
 				labTestResult.OBX.push(obx);
 				break;

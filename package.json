@@ -2,10 +2,12 @@
 	"name": "tcp-server",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.js",
+	"main": "index.ts",
+	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "node server.js"
+		"start": "tsc && node dist/client.js",
+		"build": "tsc"
 	},
 	"author": "",
 	"license": "MIT",
@@ -13,5 +15,9 @@
 		"@apollo/client": "^3.9.9",
 		"cross-fetch": "^4.0.0",
 		"graphql": "^16.8.1"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.2",
+		"typescript": "^5.4.3"
 	}
 }
