@@ -1,4 +1,4 @@
-import { gql } from "../../node_modules/@apollo/client/index";
+import { gql } from "@apollo/client/core/index.js";
 export const RECORD_MACHINE_RESPONSE = gql `
 	mutation recordMachineResponse(
 		$tokenInput: String!

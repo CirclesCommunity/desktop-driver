@@ -1,4 +1,9 @@
-import { ApolloClient, gql, HttpLink, InMemoryCache } from "@apollo/client";
+import {
+	ApolloClient,
+	gql,
+	HttpLink,
+	InMemoryCache,
+} from "@apollo/client/core/index.js";
 import fetch from "cross-fetch";
 
 export const client = new ApolloClient({

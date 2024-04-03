@@ -1,4 +1,5 @@
-import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7";
+import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7.js";
+import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
 function formatMachineDate(machineDate) {
     // machineDate = YYYYMMDDHHMMSS
     const formattedDate = machineDate.slice(0, 4) +
@@ -168,6 +169,7 @@ export function parseAndSendLabTestResultHL7(HL7Message) {
                 value: obx.observationValue,
             });
         });
+        sendMachineResponse({ responses, branchId: "123", requirementId: 2 });
     }
     return labTestResult;
 }

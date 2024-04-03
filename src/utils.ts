@@ -1,4 +1,4 @@
-import { MachineResponse } from "@/types/graphql-types/machine";
+import { MachineResponse } from "@/types/graphql-types/machine.js";
 import {
 	LabTest,
 	MessageDelimiters,
@@ -7,9 +7,9 @@ import {
 	OBXObjectType,
 	PIDObjectType,
 	PV1ObjectType,
-} from "../types/HL7Types";
-import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7";
-import { sendMachineResponse } from "../api/mutate/sendResultInputs";
+} from "../types/HL7Types.js";
+import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7.js";
+import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
 
 function formatMachineDate(machineDate: string) {
 	// machineDate = YYYYMMDDHHMMSS

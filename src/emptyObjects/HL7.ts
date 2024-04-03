@@ -3,7 +3,7 @@ import {
 	OBRObjectType,
 	PIDObjectType,
 	PV1ObjectType,
-} from "../../types/HL7Types";
+} from "../../types/HL7Types.js";
 
 export const emptyMSH: MSHObjectType = {
 	fieldSeparator: "",

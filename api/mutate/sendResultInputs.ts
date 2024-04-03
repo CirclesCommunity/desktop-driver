@@ -1,9 +1,9 @@
 import {
 	MachineResponse,
 	MachineResponseInput,
-} from "@/types/graphql-types/machine";
-import { client } from "@/client/src/index";
-import { RECORD_MACHINE_RESPONSE } from "@/mutations/recordMachineResponse";
+} from "@/types/graphql-types/machine.js";
+import { client } from "../../client/src/index.js";
+import { RECORD_MACHINE_RESPONSE } from "../../graphql/mutations/recordMachineResponse.js";
 
 export const sendMachineResponse = async (
 	machineResponseInput: MachineResponseInput
