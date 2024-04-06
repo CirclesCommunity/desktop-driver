@@ -2,7 +2,7 @@ export type MachineResponse = {
 	_id: string;
 	requirementId: number;
 	responses: {
-		globalId: string;
+		globalInputId: string;
 		value: string;
 	}[];
 	tenantId: string;
