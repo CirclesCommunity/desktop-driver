@@ -12,7 +12,7 @@ export const RECORD_MACHINE_RESPONSE = gql`
 			_id
 			requirementId
 			responses {
-				globalId
+				globalInputId
 				value
 			}
 			tenantId
