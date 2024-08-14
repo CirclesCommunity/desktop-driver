@@ -8,7 +8,13 @@ import {
 	PIDObjectType,
 	PV1ObjectType,
 } from "../types/HL7Types.js";
-import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7.js";
+import {
+	CBC_RESULT_MAPPING,
+	emptyMSH,
+	emptyOBR,
+	emptyPID,
+	emptyPV1,
+} from "./emptyObjects/HL7.js";
 import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
 
 function formatMachineDate(machineDate: string) {
@@ -161,7 +167,12 @@ const readPV1 = (HL7PV1: string, fieldDelimiter: string): PV1ObjectType => {
 	return PV1Object;
 };
 
-const getGlobalIdFromMachineId = (id: string): string => id;
+const getGlobalIdFromMachineId = (
+	machineIdentifier: string // "CODE^LABEL^CODE_SOURCE"
+): string => {
+	const code = machineIdentifier.split("^")[0];
+	return CBC_RESULT_MAPPING[code] || machineIdentifier;
+};
 
 export function parseAndSendLabTestResultHL7(HL7Message: string) {
 	// Split the message into segments
