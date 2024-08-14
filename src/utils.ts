@@ -230,7 +230,11 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 				value: obx.observationValue,
 			});
 		});
-		sendMachineResponse({ responses, branchId: "123", requirementId: 2 });
+		sendMachineResponse({
+			responses,
+			branchId: "123",
+			requirementId: labTestResult.OBR.sampleId || "2",
+		});
 	}
 
 	return labTestResult;

@@ -165,7 +165,7 @@ export function parseAndSendLabTestResultHL7(HL7Message) {
         const responses = [];
         labTestResult.OBX.forEach((obx) => {
             responses.push({
-                globalId: getGlobalIdFromMachineId(obx.observationIdentifier),
+                globalInputId: getGlobalIdFromMachineId(obx.observationIdentifier),
                 value: obx.observationValue,
             });
         });

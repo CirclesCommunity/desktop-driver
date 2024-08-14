@@ -1,6 +1,6 @@
 export type MachineResponse = {
 	_id: string;
-	requirementId: number;
+	requirementId: string;
 	responses: {
 		globalInputId: string;
 		value: string;
