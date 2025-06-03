@@ -4,51 +4,62 @@ const host = "127.0.0.1";
 
 let sockets: net.Socket[] = [];
 
-const server = net.createServer((socket) => {
-	console.log("Client connected");
+const server = net.createServer(
+	// (socket) => {
+	// console.log("Client connected");
 
-	socket.on("data", (data) => {
-		console.log("Received data: " + data);
-	});
+	// socket.on("data", (data) => {
+	// 	console.log("Received data: " + data);
+	// });
 
-	socket.on("end", () => {
-		console.log("Client disconnected");
-	});
-});
+	// socket.on("end", () => {
+	// 	console.log("Client disconnected");
+	// });
+	// }
+);
 
-server.on("connection", function (sock) {
-	console.log("CONNECTED: " + sock.remoteAddress + ":" + sock.remotePort);
-	sockets.push(sock);
+server.on("connection", function (socket) {
+	console.log(`CONNECTED ${socket.remoteAddress}: ${socket.remotePort}`);
+	sockets.push(socket);
 
-	sock.on("data", function (data) {
-		console.log("DATA " + sock.remoteAddress + ": " + data);
+	socket.on("data", function (data) {
+		console.log(`DATA ${socket.remoteAddress}: ${data}`);
 		// Write the data back to all the connected, the client will receive it as data from the server
-		sockets.forEach(function (sock, index, array) {
-			sock.write(
-				sock.remoteAddress +
-					":" +
-					sock.remotePort +
-					" said " +
-					data +
-					"\n"
+		sockets.forEach(function (socket, index, array) {
+			socket.write(`${socket.remoteAddress}: ${socket.remotePort} said ${data}\n`
 			);
 		});
+	});
 
-		sock.on("close", function (data) {
-			let index = sockets.findIndex(function (o) {
-				return (
-					o.remoteAddress === sock.remoteAddress &&
-					o.remotePort === sock.remotePort
-				);
-			});
-			if (index !== -1) sockets.splice(index, 1);
-			console.log(
-				"CLOSED: " + sock.remoteAddress + " " + sock.remotePort
-			);
-		});
+	const cleanUp = () => {
+		const index = sockets.indexOf(socket);
+		if ((index !== -1)) {
+			sockets.splice(index, 1);
+		};
+		console.log(`Client disconnected: ${socket.remoteAddress} : ${socket.remotePort}`);
+	};
+
+	// socket.on("close", function (data) {
+	// 	let index = sockets.findIndex(function (o) {
+	// 		return (
+	// 			o.remoteAddress === socket.remoteAddress &&
+	// 			o.remotePort === socket.remotePort
+	// 		);
+	// 	});
+	// 	if (index !== -1) sockets.splice(index, 1);
+	// 	console.log(
+	// 		`CLOSED: ${socket.remoteAddress} : ${socket.remotePort}`
+	// 	);
+	// });
+
+	socket.on("end", cleanUp);
+	socket.on("close", cleanUp);
+	socket.on("error", (err) => {
+		console.error(`Error : ${err.message}\nconnection will be closed.`);
+		cleanUp();
 	});
 });
 
 server.listen(port, host, () => {
-	console.log("TCP Server is running on port " + port + ".");
+	console.log(`TCP Server is running on ${host} port ${port}`);
 });
