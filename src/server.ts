@@ -22,6 +22,7 @@ server.on("connection", function (socket) {
 	console.log(`CONNECTED ${socket.remoteAddress}: ${socket.remotePort}`);
 	sockets.push(socket);
 
+	// .forEach() sends recieved message back to the sender?
 	socket.on("data", function (data) {
 		console.log(`DATA ${socket.remoteAddress}: ${data}`);
 		// Write the data back to all the connected, the client will receive it as data from the server
@@ -29,6 +30,13 @@ server.on("connection", function (socket) {
 			socket.write(`${socket.remoteAddress}: ${socket.remotePort} said ${data}\n`
 			);
 		});
+
+		// sockets.forEach((sock) => {
+		// 	if ((sock !== socket)&&(!sock.destroyed)) {
+		// 		socket.write(`${socket.remoteAddress}: ${socket.remotePort} said ${data}\n`
+		// 	);
+		// 	}
+		// })
 	});
 
 	const cleanUp = () => {

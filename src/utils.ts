@@ -1,6 +1,6 @@
 import { MachineResponse } from "@/types/graphql-types/machine.js";
 import {
-	LabTest,
+	HL7Message,
 	MessageDelimiters,
 	MSHObjectType,
 	OBRObjectType,
@@ -84,8 +84,8 @@ function decodeFieldEscapedDelimiters(
 	return decodedField;
 }
 
-const readMSH = (HL7MSH: string): MSHObjectType => {
-	const fieldDelimiter = getFieldDelimiter(HL7MSH);
+const readMSH = (HL7MSH: string, fieldDelimiter: string): MSHObjectType => {
+	// const fieldDelimiter = getFieldDelimiter(HL7MSH);
 	const fields = HL7MSH.split(fieldDelimiter);
 	const mshObject = {
 		fieldSeparator: fields[1],
@@ -180,7 +180,7 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 	const fieldDelimiter = getFieldDelimiter(HL7Message);
 
 	// Initialize the result object
-	let labTestResult: LabTest = {
+	let parsedHL7Message: HL7Message = { // HL7 message parsed object
 		MSH: { ...emptyMSH },
 		PID: { ...emptyPID }, // Initialize PID object
 		PV1: { ...emptyPV1 }, // Initialize PV1 object
@@ -191,30 +191,30 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 		const segmentType = segment.substring(0, 3);
 		switch (segmentType) {
 			case "MSH":
-				labTestResult.MSH = readMSH(segment);
+				parsedHL7Message.MSH = readMSH(segment, fieldDelimiter);
 				break;
 			case "PID":
-				labTestResult.PID = readPID(segment, fieldDelimiter);
+				parsedHL7Message.PID = readPID(segment, fieldDelimiter);
 				// Format the date of birth
-				labTestResult.PID.dateTimeOfBirth = formatMachineDate(
-					labTestResult.PID.dateTimeOfBirth || ""
+				parsedHL7Message.PID.dateTimeOfBirth = formatMachineDate(
+					parsedHL7Message.PID.dateTimeOfBirth || ""
 				);
 				break;
 			case "PV1":
-				labTestResult.PV1 = readPV1(segment, fieldDelimiter);
+				parsedHL7Message.PV1 = readPV1(segment, fieldDelimiter);
 				break;
 			case "OBR":
-				labTestResult.OBR = readOBR(segment, fieldDelimiter);
+				parsedHL7Message.OBR = readOBR(segment, fieldDelimiter);
 				// Format dates in the OBR segment
-				labTestResult.OBR.dateTimeOfCollection = formatMachineDate(
-					labTestResult.OBR.dateTimeOfCollection || ""
+				parsedHL7Message.OBR.dateTimeOfCollection = formatMachineDate(
+					parsedHL7Message.OBR.dateTimeOfCollection || ""
 				);
-				labTestResult.OBR.dateTimeOfAnalysis = formatMachineDate(
-					labTestResult.OBR.dateTimeOfAnalysis || ""
+				parsedHL7Message.OBR.dateTimeOfAnalysis = formatMachineDate(
+					parsedHL7Message.OBR.dateTimeOfAnalysis || ""
 				);
-				labTestResult.OBR.dateTimeOfSpecimenCollection =
+				parsedHL7Message.OBR.dateTimeOfSpecimenCollection =
 					formatMachineDate(
-						labTestResult.OBR.dateTimeOfSpecimenCollection || ""
+						parsedHL7Message.OBR.dateTimeOfSpecimenCollection || ""
 					);
 				break;
 			case "OBX":
@@ -222,18 +222,18 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 				// Decode potentially escaped delimiters in OBX observation values
 				obx.observationValue = decodeFieldEscapedDelimiters(
 					obx.observationValue,
-					getDelimiters(labTestResult.MSH.encodingCharacters)
+					getDelimiters(parsedHL7Message.MSH.encodingCharacters)
 				);
-				labTestResult.OBX.push(obx);
+				parsedHL7Message.OBX.push(obx);
 				break;
 			default:
 				break;
 		}
 	});
 
-	if (labTestResult.OBR.sampleId) {
+	if (parsedHL7Message.OBR.sampleId) {
 		const responses: MachineResponse["responses"] = [];
-		labTestResult.OBX.forEach((obx) => {
+		parsedHL7Message.OBX.forEach((obx) => {
 			responses.push({
 				globalInputId: getGlobalIdFromMachineId(
 					obx.observationIdentifier
@@ -244,9 +244,9 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 		sendMachineResponse({
 			responses,
 			branchId: "123",
-			requirementId: labTestResult.OBR.sampleId || "2",
+			requirementId: parsedHL7Message.OBR.sampleId || "2",
 		});
 	}
 
-	return labTestResult;
+	return parsedHL7Message;
 }

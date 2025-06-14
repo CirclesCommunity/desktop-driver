@@ -67,7 +67,7 @@ export type PV1ObjectType = {
 	patientLocation: string; // "Department ^^ Bed No.", indicating a structured format with department and bed number.
 };
 
-export type LabTest = {
+export type HL7Message = {
 	MSH: MSHObjectType;
 	PID: PIDObjectType;
 	PV1: PV1ObjectType;
