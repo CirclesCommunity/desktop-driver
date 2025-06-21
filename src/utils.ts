@@ -16,6 +16,7 @@ import {
 	emptyPV1,
 } from "./emptyObjects/HL7.js";
 import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
+import { parse } from "path";
 
 function formatMachineDate(machineDate: string) {
 	// machineDate = YYYYMMDDHHMMSS
@@ -231,22 +232,26 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 		}
 	});
 
-	if (parsedHL7Message.OBR.sampleId) {
-		const responses: MachineResponse["responses"] = [];
-		parsedHL7Message.OBX.forEach((obx) => {
-			responses.push({
-				globalInputId: getGlobalIdFromMachineId(
-					obx.observationIdentifier
-				),
-				value: obx.observationValue,
-			});
-		});
-		sendMachineResponse({
-			responses,
-			branchId: "123",
-			requirementId: parsedHL7Message.OBR.sampleId || "2",
-		});
-	}
+	console.log(JSON.stringify(parsedHL7Message, null, 2));
+	// if (parsedHL7Message.OBR.sampleId) {
+	// 	const responses: MachineResponse["responses"] = [];
+	// 	parsedHL7Message.OBX.forEach((obx) => {
+	// 		responses.push({
+	// 			globalInputId: getGlobalIdFromMachineId(
+	// 				obx.observationIdentifier
+	// 			),
+	// 			value: obx.observationValue,
+	// 		});
+	// 	});
+	// 	sendMachineResponse({
+	// 		responses,
+	// 		branchId: "123",
+	// 		requirementId: parsedHL7Message.OBR.sampleId || "2",
+	// 	});
+	// }
 
 	return parsedHL7Message;
-}
+};
+
+
+

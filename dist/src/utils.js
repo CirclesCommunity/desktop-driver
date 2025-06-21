@@ -1,5 +1,4 @@
-import { emptyMSH, emptyOBR, emptyPID, emptyPV1 } from "./emptyObjects/HL7.js";
-import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
+import { CBC_RESULT_MAPPING, emptyMSH, emptyOBR, emptyPID, emptyPV1, } from "./emptyObjects/HL7.js";
 function formatMachineDate(machineDate) {
     // machineDate = YYYYMMDDHHMMSS
     const formattedDate = machineDate.slice(0, 4) +
@@ -38,8 +37,8 @@ function decodeFieldEscapedDelimiters(HL7Field, delimiters) {
         .replaceAll(delimiters.escapeDelimiter + ".br" + delimiters.escapeDelimiter, "\r");
     return decodedField;
 }
-const readMSH = (HL7MSH) => {
-    const fieldDelimiter = getFieldDelimiter(HL7MSH);
+const readMSH = (HL7MSH, fieldDelimiter) => {
+    // const fieldDelimiter = getFieldDelimiter(HL7MSH);
     const fields = HL7MSH.split(fieldDelimiter);
     const mshObject = {
         fieldSeparator: fields[1],
@@ -116,13 +115,17 @@ const readPV1 = (HL7PV1, fieldDelimiter) => {
     };
     return PV1Object;
 };
-const getGlobalIdFromMachineId = (id) => id;
+const getGlobalIdFromMachineId = (machineIdentifier // "CODE^LABEL^CODE_SOURCE"
+) => {
+    const code = machineIdentifier.split("^")[0];
+    return CBC_RESULT_MAPPING[code] || machineIdentifier;
+};
 export function parseAndSendLabTestResultHL7(HL7Message) {
     // Split the message into segments
     const segments = HL7Message.split("\r");
     const fieldDelimiter = getFieldDelimiter(HL7Message);
     // Initialize the result object
-    let labTestResult = {
+    let parsedHL7Message = {
         MSH: Object.assign({}, emptyMSH),
         PID: Object.assign({}, emptyPID), // Initialize PID object
         PV1: Object.assign({}, emptyPV1), // Initialize PV1 object
@@ -133,43 +136,51 @@ export function parseAndSendLabTestResultHL7(HL7Message) {
         const segmentType = segment.substring(0, 3);
         switch (segmentType) {
             case "MSH":
-                labTestResult.MSH = readMSH(segment);
+                parsedHL7Message.MSH = readMSH(segment, fieldDelimiter);
                 break;
             case "PID":
-                labTestResult.PID = readPID(segment, fieldDelimiter);
+                parsedHL7Message.PID = readPID(segment, fieldDelimiter);
                 // Format the date of birth
-                labTestResult.PID.dateTimeOfBirth = formatMachineDate(labTestResult.PID.dateTimeOfBirth || "");
+                parsedHL7Message.PID.dateTimeOfBirth = formatMachineDate(parsedHL7Message.PID.dateTimeOfBirth || "");
                 break;
             case "PV1":
-                labTestResult.PV1 = readPV1(segment, fieldDelimiter);
+                parsedHL7Message.PV1 = readPV1(segment, fieldDelimiter);
                 break;
             case "OBR":
-                labTestResult.OBR = readOBR(segment, fieldDelimiter);
+                parsedHL7Message.OBR = readOBR(segment, fieldDelimiter);
                 // Format dates in the OBR segment
-                labTestResult.OBR.dateTimeOfCollection = formatMachineDate(labTestResult.OBR.dateTimeOfCollection || "");
-                labTestResult.OBR.dateTimeOfAnalysis = formatMachineDate(labTestResult.OBR.dateTimeOfAnalysis || "");
-                labTestResult.OBR.dateTimeOfSpecimenCollection =
-                    formatMachineDate(labTestResult.OBR.dateTimeOfSpecimenCollection || "");
+                parsedHL7Message.OBR.dateTimeOfCollection = formatMachineDate(parsedHL7Message.OBR.dateTimeOfCollection || "");
+                parsedHL7Message.OBR.dateTimeOfAnalysis = formatMachineDate(parsedHL7Message.OBR.dateTimeOfAnalysis || "");
+                parsedHL7Message.OBR.dateTimeOfSpecimenCollection =
+                    formatMachineDate(parsedHL7Message.OBR.dateTimeOfSpecimenCollection || "");
                 break;
             case "OBX":
                 let obx = readOBX(segment, fieldDelimiter);
                 // Decode potentially escaped delimiters in OBX observation values
-                obx.observationValue = decodeFieldEscapedDelimiters(obx.observationValue, getDelimiters(labTestResult.MSH.encodingCharacters));
-                labTestResult.OBX.push(obx);
+                obx.observationValue = decodeFieldEscapedDelimiters(obx.observationValue, getDelimiters(parsedHL7Message.MSH.encodingCharacters));
+                parsedHL7Message.OBX.push(obx);
                 break;
             default:
                 break;
         }
     });
-    if (labTestResult.OBR.sampleId) {
-        const responses = [];
-        labTestResult.OBX.forEach((obx) => {
-            responses.push({
-                globalInputId: getGlobalIdFromMachineId(obx.observationIdentifier),
-                value: obx.observationValue,
-            });
-        });
-        sendMachineResponse({ responses, branchId: "123", requirementId: 2 });
-    }
-    return labTestResult;
+    console.log(JSON.stringify(parsedHL7Message, null, 2));
+    // if (parsedHL7Message.OBR.sampleId) {
+    // 	const responses: MachineResponse["responses"] = [];
+    // 	parsedHL7Message.OBX.forEach((obx) => {
+    // 		responses.push({
+    // 			globalInputId: getGlobalIdFromMachineId(
+    // 				obx.observationIdentifier
+    // 			),
+    // 			value: obx.observationValue,
+    // 		});
+    // 	});
+    // 	sendMachineResponse({
+    // 		responses,
+    // 		branchId: "123",
+    // 		requirementId: parsedHL7Message.OBR.sampleId || "2",
+    // 	});
+    // }
+    return parsedHL7Message;
 }
+;

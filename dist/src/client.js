@@ -3,17 +3,18 @@ import { parseAndSendLabTestResultHL7 } from "./utils.js";
 const client = new net.Socket();
 const port = 5100;
 const host = "10.48.3.102";
-let buffer = "";
+// const host = "127.0.0.1";
 const CARRIAGE_RETURN = String.fromCharCode(13);
 const START_OF_BLOCK = "\u000b";
 const END_OF_BLOCK = "\u001c";
 const STX = "\u0002";
+let buffer = "";
+console.log(`about to client.connect().`);
 client.connect(port, host, function () {
-    console.log("Connected");
+    console.log(`Connected Client ${host}:${port}\n`);
     // client.write(START_OF_BLOCK + "[ACK]" + END_OF_BLOCK);
 });
 client.on("data", function (data) {
-    var _a, _b, _c, _d, _e;
     buffer += data.toString(); // Append incoming data to the buffer
     client.write(START_OF_BLOCK + "[ACK]" + END_OF_BLOCK);
     while (true) {
@@ -27,9 +28,23 @@ client.on("data", function (data) {
             try {
                 parseAndSendLabTestResultHL7(message);
             }
-            catch (e) {
-                console.log("🚀 ~ file: useCreateMutation.tsx:83 ~ e:", e);
-                console.log("\n😀 e..networkError, \n ", e.networkError, "\n😀 e?.networkError?.result?.errors,\n", (_b = (_a = e === null || e === void 0 ? void 0 : e.networkError) === null || _a === void 0 ? void 0 : _a.result) === null || _b === void 0 ? void 0 : _b.errors, "\n😀 e?.networkError?.response,\n", (_c = e === null || e === void 0 ? void 0 : e.networkError) === null || _c === void 0 ? void 0 : _c.response, "\n😀 e?.networkError?.response?.headers,\n", (_e = (_d = e === null || e === void 0 ? void 0 : e.networkError) === null || _d === void 0 ? void 0 : _d.response) === null || _e === void 0 ? void 0 : _e.headers, "\n😀 e.graphQLErrors[0], \n ", e.graphQLErrors[0], "\n😀 e \n", e);
+            catch (error) {
+                console.log(`Error Trying to parse recieved message: client: ${host}:${port} error: ${error}\n`);
+                // console.log("🚀 ~ file: useCreateMutation.tsx:83 ~ error:", error);
+                // console.log(
+                // 	"\n😀 error..networkError, \n ",
+                // 	error.networkError,
+                // 	"\n😀 error?.networkError?.result?.errors,\n",
+                // 	error?.networkError?.result?.errors,
+                // 	"\n😀 error?.networkError?.response,\n",
+                // 	error?.networkError?.response,
+                // 	"\n😀 error?.networkError?.response?.headers,\n",
+                // 	error?.networkError?.response?.headers,
+                // 	"\n😀 error.graphQLErrors[0], \n ",
+                // 	error.graphQLErrors[0],
+                // 	"\n😀 error \n",
+                // 	error
+                // );
             }
             // Remove processed message from the buffer
             buffer = buffer.slice(endIdx + END_OF_BLOCK.length);
@@ -78,3 +93,134 @@ OBX|22|NM|10030^GRAN%^99MRC||47.3|%|50.0-70.0|L~N|||F
 OBX|23|NM|10013^PLCC^99MRC||88|/nL|30-90|N|||F
 OBX|24|NM|10014^PLCR^99MRC||21.9|%|11.0-45.0|N|||F
 */
+// import net from "net";
+// import { parseAndSendLabTestResultHL7 } from "./utils.js";
+// const port = 5100;
+// const host = "10.48.3.102";
+// const START_OF_BLOCK = "\u000b";
+// const CARRIAGE_RETURN = String.fromCharCode(13);
+// const END_OF_BLOCK = "\u001c";
+// const CONNECTION_TIMEOUT = 10000; // 10 seconds
+// const MAX_BUFFER_SIZE = 1024 * 1024; // 1MB limit
+// const RECONNECT_DELAY = 5000; // 5 seconds
+// let buffer = "";
+// let client: net.Socket | null = null;
+// let reconnectTimer: NodeJS.Timeout | null = null;
+// function createConnection() {
+//     if (client) {
+//         client.removeAllListeners();
+//         client.destroy();
+//     }
+//     client = new net.Socket();
+//     // Set connection timeout
+//     client.setTimeout(CONNECTION_TIMEOUT);
+//     client.connect(port, host, () => {
+//         console.log(`Connected to ${host}:${port}`);
+//         buffer = ""; // Reset buffer on new connection
+//         if (reconnectTimer) {
+//             clearTimeout(reconnectTimer);
+//             reconnectTimer = null;
+//         }
+//     });
+//     client.on("data", (data) => {
+//         buffer += data.toString();
+//         // Prevent buffer from growing too large
+//         if (buffer.length > MAX_BUFFER_SIZE) {
+//             console.error("Buffer overflow, clearing buffer");
+//             buffer = "";
+//             return;
+//         }
+//         processMessages();
+//     });
+//     client.on("close", () => {
+//         console.log("Connection closed");
+//         scheduleReconnect();
+//     });
+//     client.on("error", (err) => {
+//         console.error("Socket error:", err.message);
+//         scheduleReconnect();
+//     });
+//     client.on("timeout", () => {
+//         console.error("Connection timeout");
+//         client?.destroy();
+//         scheduleReconnect();
+//     });
+// };
+// function processMessages() {
+//     while (true) {
+//         const startIdx = buffer.indexOf(START_OF_BLOCK);
+//         const endIdx = buffer.indexOf(END_OF_BLOCK);
+//         // If start and end markers are found
+//         if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
+//             const message = buffer.slice(
+//                 startIdx + START_OF_BLOCK.length,
+//                 endIdx
+//             );
+//             console.log("Received message:", message.substring(0, 100) + "..."); // Truncate for logging
+//             let processingSuccess = false;
+//             try {
+//                 parseAndSendLabTestResultHL7(message);
+//                 processingSuccess = true;
+//                 console.log("Message processed successfully");
+//             } catch (error) {
+//                 console.error("Error processing HL7 message:", error);
+//                 // Log error details without excessive verbosity
+//                 if (error instanceof Error) {
+//                     console.error("Error details:", {
+//                         name: error.name,
+//                         message: error.message,
+//                         stack: error.stack?.split('\n').slice(0, 3).join('\n') // Limit stack trace
+//                     });
+//                 }
+//             }
+//             // Send ACK only after processing attempt
+//             if (client && !client.destroyed) {
+//                 try {
+//                     client.write(START_OF_BLOCK + "[ACK]" + END_OF_BLOCK);
+//                     console.log("ACK sent");
+//                 } catch (writeError) {
+//                     console.error("Failed to send ACK:", writeError);
+//                 }
+//             }
+//             // Remove processed message from the buffer
+//             buffer = buffer.slice(endIdx + END_OF_BLOCK.length);
+//         } else {
+//             // If either start or end marker is missing, or they're in wrong order
+//             if (startIdx === -1 && endIdx !== -1) {
+//                 // End marker without start marker - corrupted data
+//                 buffer = buffer.slice(endIdx + END_OF_BLOCK.length);
+//                 console.warn("Found end marker without start marker, skipping corrupted data");
+//                 continue;
+//             }
+//             break;
+//         }
+//     }
+// }
+// function scheduleReconnect() {
+//     if (reconnectTimer) {
+//         return; // Already scheduled
+//     }
+//     console.log(`Reconnecting in ${RECONNECT_DELAY / 1000} seconds...`);
+//     reconnectTimer = setTimeout(() => {
+//         reconnectTimer = null;
+//         createConnection();
+//     }, RECONNECT_DELAY);
+// }
+// function shutdown() {
+//     console.log("Shutting down client...");
+//     if (reconnectTimer) {
+//         clearTimeout(reconnectTimer);
+//         reconnectTimer = null;
+//     }
+//     if (client) {
+//         client.removeAllListeners();
+//         client.destroy();
+//         client = null;
+//     }
+// }
+// // Handle graceful shutdown
+// process.on('SIGINT', shutdown);
+// process.on('SIGTERM', shutdown);
+// // Start the connection
+// console.log(`Starting HL7 client, connecting to ${host}:${port}...`);
+// createConnection();

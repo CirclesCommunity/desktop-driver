@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { client } from "../../client/src/index.js";
 import { RECORD_MACHINE_RESPONSE } from "../../graphql/mutations/recordMachineResponse.js";
 export const sendMachineResponse = (machineResponseInput) => __awaiter(void 0, void 0, void 0, function* () {
-    const tokenInput = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1ODlkYWQyYzliYTQyZGQyNjVhMjhiYiIsInRlbmFudCI6IjY1NWQ4N2ZlYTIwMGI3M2QwNDJlN2UzMiIsIm9yZ25pemF0aW9uSWQiOiI2NTVkODdmZWEyMDBiNzNkMDQyZTdlMzIiLCJpYXQiOjE3MDg3MDQ0MzQsImV4cCI6MzQxODU1NjU5Mn0.h-HsnzXiav4m8jGVqWlB2xvtMJJwAFbi6udN9S1bwvQ";
+    const tokenInput = process.env.TOKEN_INPUT;
     const result = yield client.mutate({
         mutation: RECORD_MACHINE_RESPONSE,
         variables: {

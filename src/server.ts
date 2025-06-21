@@ -1,4 +1,7 @@
 import net from "net";
+import {parseAndSendLabTestResultHL7} from "./utils";
+
+// "start": "tsc && node dist/src/server.js",
 const port = 7070;
 const host = "127.0.0.1";
 
@@ -24,12 +27,15 @@ server.on("connection", function (socket) {
 
 	// .forEach() sends recieved message back to the sender?
 	socket.on("data", function (data) {
-		console.log(`DATA ${socket.remoteAddress}: ${data}`);
+		console.log(`DATA ${socket.remoteAddress}: ${data}\n`);
+
+		let HL7_message:string = data.toString("utf-8");
+		parseAndSendLabTestResultHL7(HL7_message);
 		// Write the data back to all the connected, the client will receive it as data from the server
-		sockets.forEach(function (socket, index, array) {
-			socket.write(`${socket.remoteAddress}: ${socket.remotePort} said ${data}\n`
-			);
-		});
+		// sockets.forEach(function (socket, index, array) {
+		// 	socket.write(`${socket.remoteAddress}: ${socket.remotePort} said ${data}\n`
+		// 	);
+		// });
 
 		// sockets.forEach((sock) => {
 		// 	if ((sock !== socket)&&(!sock.destroyed)) {

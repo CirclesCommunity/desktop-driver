@@ -1,5 +1,5 @@
 import net from "net";
-import { parseAndSendLabTestResultHL7 } from "./utils.js";
+import {parseAndSendLabTestResultHL7} from "./utils.js";
 
 
 
@@ -7,6 +7,7 @@ import { parseAndSendLabTestResultHL7 } from "./utils.js";
 const client = new net.Socket();
 const port = 5100;
 const host = "10.48.3.102";
+// const host = "127.0.0.1";
 
 const CARRIAGE_RETURN = String.fromCharCode(13);
 const START_OF_BLOCK = "\u000b";
@@ -15,8 +16,10 @@ const STX = "\u0002";
 
 let buffer = "";
 
+console.log(`about to client.connect().`);
+
 client.connect(port, host, function () {
-	console.log("Connected");
+	console.log(`Connected Client ${host}:${port}\n`);
 	// client.write(START_OF_BLOCK + "[ACK]" + END_OF_BLOCK);
 });
 client.on("data", function (data) {
