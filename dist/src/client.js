@@ -1,5 +1,5 @@
 import net from "net";
-import { parseAndSendLabTestResultHL7 } from "./utils.js";
+import { parseAndSendLabTestResultHL7 } from "./utils";
 const client = new net.Socket();
 const port = 5100;
 const host = "10.48.3.102";

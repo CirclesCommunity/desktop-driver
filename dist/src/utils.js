@@ -1,4 +1,6 @@
 import { CBC_RESULT_MAPPING, emptyMSH, emptyOBR, emptyPID, emptyPV1, } from "./emptyObjects/HL7.js";
+import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
+import { parse } from "path";
 function formatMachineDate(machineDate) {
     // machineDate = YYYYMMDDHHMMSS
     const formattedDate = machineDate.slice(0, 4) +
@@ -126,10 +128,10 @@ export function parseAndSendLabTestResultHL7(HL7Message) {
     const fieldDelimiter = getFieldDelimiter(HL7Message);
     // Initialize the result object
     let parsedHL7Message = {
-        MSH: Object.assign({}, emptyMSH),
-        PID: Object.assign({}, emptyPID), // Initialize PID object
-        PV1: Object.assign({}, emptyPV1), // Initialize PV1 object
-        OBR: Object.assign({}, emptyOBR),
+        MSH: { ...emptyMSH },
+        PID: { ...emptyPID }, // Initialize PID object
+        PV1: { ...emptyPV1 }, // Initialize PV1 object
+        OBR: { ...emptyOBR },
         OBX: [],
     };
     segments.forEach((segment) => {

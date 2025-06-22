@@ -1,5 +1,5 @@
-import { MachineResponse } from "@/types/graphql-types/machine.js";
-import {
+import type { MachineResponse } from "@/types/graphql-types/machine.js";
+import type {
 	HL7Message,
 	MessageDelimiters,
 	MSHObjectType,

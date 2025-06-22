@@ -1,5 +1,5 @@
 import net from "net";
-import {parseAndSendLabTestResultHL7} from "./utils.js";
+import {parseAndSendLabTestResultHL7} from "./utils";
 
 
 

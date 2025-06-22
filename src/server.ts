@@ -1,5 +1,5 @@
 import net from "net";
-import {parseAndSendLabTestResultHL7} from "./utils";
+import { parseAndSendLabTestResultHL7 } from "./utils.js";
 
 // "start": "tsc && node dist/src/server.js",
 const port = 7070;

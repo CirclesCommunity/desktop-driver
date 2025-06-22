@@ -1,4 +1,4 @@
-import {
+import type {
 	MachineResponse,
 	MachineResponseInput,
 } from "@/types/graphql-types/machine.js";
