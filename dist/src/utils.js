@@ -166,6 +166,7 @@ export function parseAndSendLabTestResultHL7(HL7Message) {
                 break;
         }
     });
+    console.log(`\nHL7 message object: \n`);
     console.log(JSON.stringify(parsedHL7Message, null, 2));
     // if (parsedHL7Message.OBR.sampleId) {
     // 	const responses: MachineResponse["responses"] = [];

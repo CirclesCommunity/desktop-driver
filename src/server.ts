@@ -7,6 +7,12 @@ const host = "127.0.0.1";
 
 let sockets: net.Socket[] = [];
 
+const start_marker = "\u000b";
+const end_marker = "\u001c";
+const STX = "\u0002";
+
+let buffer = "";
+
 const server = net.createServer(
 	// (socket) => {
 	// console.log("Client connected");
@@ -28,9 +34,31 @@ server.on("connection", function (socket) {
 	// .forEach() sends recieved message back to the sender?
 	socket.on("data", function (data) {
 		console.log(`DATA ${socket.remoteAddress}: ${data}\n`);
+		
+		buffer += data.toString("utf-8");
 
-		let HL7_message:string = data.toString("utf-8");
-		parseAndSendLabTestResultHL7(HL7_message);
+		let start = buffer.indexOf("\x0b");
+		let end = buffer.indexOf("\x1c\r");
+
+
+		while (((start !== -1) && (end !== -1)) && (end > start)) {
+			let HL7_message:string = buffer.substring(start+1, end);
+
+			console.log(`HL7 Message Recieved:\n${HL7_message}\n`);
+
+			parseAndSendLabTestResultHL7(HL7_message);
+
+			socket.write(
+				start_marker +
+				"[ACK]" +
+				end_marker
+			);
+			// Flushing buffer
+			buffer = buffer.slice(end+2);
+			start = buffer.indexOf("\x0b");
+			end = buffer.indexOf("\x1c\r");
+		};
+
 		// Write the data back to all the connected, the client will receive it as data from the server
 		// sockets.forEach(function (socket, index, array) {
 		// 	socket.write(`${socket.remoteAddress}: ${socket.remotePort} said ${data}\n`
@@ -66,7 +94,7 @@ server.on("connection", function (socket) {
 	// 	);
 	// });
 
-	socket.on("end", cleanUp);
+	// socket.on("end", cleanUp);
 	socket.on("close", cleanUp);
 	socket.on("error", (err) => {
 		console.error(`Error : ${err.message}\nconnection will be closed.`);

@@ -232,23 +232,25 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 		}
 	});
 
+	console.log(`\nHL7 message object: \n`)
 	console.log(JSON.stringify(parsedHL7Message, null, 2));
-	// if (parsedHL7Message.OBR.sampleId) {
-	// 	const responses: MachineResponse["responses"] = [];
-	// 	parsedHL7Message.OBX.forEach((obx) => {
-	// 		responses.push({
-	// 			globalInputId: getGlobalIdFromMachineId(
-	// 				obx.observationIdentifier
-	// 			),
-	// 			value: obx.observationValue,
-	// 		});
-	// 	});
-	// 	sendMachineResponse({
-	// 		responses,
-	// 		branchId: "123",
-	// 		requirementId: parsedHL7Message.OBR.sampleId || "2",
-	// 	});
-	// }
+	
+	if (parsedHL7Message.OBR.sampleId) {
+		const responses: MachineResponse["responses"] = [];
+		parsedHL7Message.OBX.forEach((obx) => {
+			responses.push({
+				globalInputId: getGlobalIdFromMachineId(
+					obx.observationIdentifier
+				),
+				value: obx.observationValue,
+			});
+		});
+		sendMachineResponse({
+			responses,
+			branchId: "123",
+			requirementId: parsedHL7Message.OBR.sampleId || "2",
+		});
+	}
 
 	return parsedHL7Message;
 };

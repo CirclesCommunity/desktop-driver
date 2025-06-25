@@ -16,7 +16,7 @@ const STX = "\u0002";
 
 let buffer = "";
 
-console.log(`about to client.connect().`);
+// console.log(`about to client.connect().`);
 
 client.connect(port, host, function () {
 	console.log(`Connected Client ${host}:${port}\n`);
