@@ -1,8 +1,10 @@
 import net from "net";
 import { parseAndSendLabTestResultHL7 } from "./utils.js";
+import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
+import dotenv from 'dotenv';
 
 // "start": "tsc && node dist/src/server.js",
-const port = 7070;
+const port = 8080;
 const host = "127.0.0.1";
 
 let sockets: net.Socket[] = [];
@@ -33,8 +35,21 @@ server.on("connection", function (socket) {
 
 	// .forEach() sends recieved message back to the sender?
 	socket.on("data", function (data) {
-		console.log(`DATA ${socket.remoteAddress}: ${data}\n`);
+		console.log(`\nDATA ${socket.remoteAddress}: ${data}\n`);
+		console.log(`JSON:${JSON.stringify(data.toString())}\n`);
 		
+		if ((data.toString().trim()==='start')) {
+			console.log(`starting test`);
+			socket.write(`\n testing apollo sending...`);
+			sendMachineResponse({
+				responses: [{
+					globalInputId: "Yellow_cells",
+					value: "33"
+				}],
+				branchId: "1919",
+				containerId: 1918,
+			});
+		}
 		buffer += data.toString("utf-8");
 
 		let start = buffer.indexOf("\x0b");

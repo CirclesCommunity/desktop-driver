@@ -9,6 +9,7 @@ import type {
 	PV1ObjectType,
 } from "../types/HL7Types.js";
 import {
+	BK200_RESULT_MAPPING,
 	CBC_RESULT_MAPPING,
 	emptyMSH,
 	emptyOBR,
@@ -168,11 +169,18 @@ const readPV1 = (HL7PV1: string, fieldDelimiter: string): PV1ObjectType => {
 	return PV1Object;
 };
 
-const getGlobalIdFromMachineId = (
+const getGlobalIdFromMachineId_sysmex = (
 	machineIdentifier: string // "CODE^LABEL^CODE_SOURCE"
 ): string => {
 	const code = machineIdentifier.split("^")[0];
 	return CBC_RESULT_MAPPING[code] || machineIdentifier;
+};
+
+const getGlobalIdFromMachineId_BK200 = (
+	machineIdentifier: string // "CODE^LABEL^CODE_SOURCE"
+): string => {
+	const code = machineIdentifier.split("^")[0];
+	return BK200_RESULT_MAPPING[code] || machineIdentifier;
 };
 
 export function parseAndSendLabTestResultHL7(HL7Message: string) {
@@ -232,23 +240,45 @@ export function parseAndSendLabTestResultHL7(HL7Message: string) {
 		}
 	});
 
-	console.log(`\nHL7 message object: \n`)
-	console.log(JSON.stringify(parsedHL7Message, null, 2));
+	
 	
 	if (parsedHL7Message.OBR.sampleId) {
+
+		console.log(`\nDevice: ${parsedHL7Message.MSH.sendingApplication} \n`);
+		console.log(`\nSecurity: ${parsedHL7Message.MSH.security} \n`);
+		console.log(`\nType: ${parsedHL7Message.MSH.messageType} \n`);
+		parsedHL7Message.OBX.forEach((value, index) => {
+			console.log(`\nOBX[${index}] { \n`);
+			console.log(`\nIdentifier: ${parsedHL7Message.OBX[index].observationIdentifier} \n`);
+			console.log(`\nIdentifier: ${parsedHL7Message.OBX[index].observationValue} \n`);
+			console.log(`}\n`);
+		});
+		
 		const responses: MachineResponse["responses"] = [];
+
 		parsedHL7Message.OBX.forEach((obx) => {
-			responses.push({
-				globalInputId: getGlobalIdFromMachineId(
-					obx.observationIdentifier
-				),
-				value: obx.observationValue,
-			});
+
+			if (parsedHL7Message.MSH.sendingApplication === "BK-200") {
+				responses.push({
+					globalInputId: getGlobalIdFromMachineId_BK200(
+						obx.observationIdentifier
+					),
+					value: obx.observationValue,
+				});
+
+			} else {
+				responses.push({
+					globalInputId: getGlobalIdFromMachineId_sysmex(
+						obx.observationIdentifier
+					),
+					value: obx.observationValue,
+				});
+			}
 		});
 		sendMachineResponse({
 			responses,
-			branchId: "123",
-			requirementId: parsedHL7Message.OBR.sampleId || "2",
+			branchId: "1919",
+			containerId: Number(parsedHL7Message.OBR.sampleId) || 2,
 		});
 	}
 

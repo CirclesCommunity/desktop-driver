@@ -32,6 +32,7 @@ export type OBRObjectType = {
 	fieldSeparator: string;
 	encodingCharacters: string;
 	sampleId: string;
+	// sampleId: number;
 	universalServiceIdentifier: string;
 	dateTimeOfCollection: string; // Optional since it skips fields[5]
 	dateTimeOfAnalysis: string; // Optional since it skips fields[5] through fields[6]

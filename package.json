@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@apollo/client": "^3.9.9",
 		"cross-fetch": "^4.0.0",
+		"dotenv": "^17.1.0",
 		"graphql": "^16.8.1",
 		"pkg": "^5.8.1"
 	},

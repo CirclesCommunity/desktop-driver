@@ -1,10 +1,12 @@
 export type MachineResponse = {
 	_id: string;
-	requirementId: string;
+	// requirementId: string;
+	containerId: number;
 	responses: {
 		globalInputId: string;
 		value: string;
 	}[];
+	used: boolean;
 	tenantId: string;
 	branchId: string;
 	createdBy: string;
@@ -16,5 +18,5 @@ export type MachineResponse = {
 
 export type MachineResponseInput = Pick<
 	MachineResponse,
-	"requirementId" | "responses" | "branchId"
+	"containerId" | "responses" | "branchId"
 >;

@@ -10,7 +10,7 @@ export const RECORD_MACHINE_RESPONSE = gql`
 			machineResponse: $machineResponseInput
 		) {
 			_id
-			requirementId
+			containerId
 			responses {
 				globalInputId
 				value
