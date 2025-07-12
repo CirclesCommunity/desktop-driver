@@ -1,7 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import net from "net";
 import { parseAndSendLabTestResultHL7 } from "./utils.js";
 import { sendMachineResponse } from "../api/mutate/sendResultInputs.js";
-import dotenv from 'dotenv';
 // "start": "tsc && node dist/src/server.js",
 const port = 8080;
 const host = "127.0.0.1";
@@ -30,14 +31,15 @@ server.on("connection", function (socket) {
         console.log(`JSON:${JSON.stringify(data.toString())}\n`);
         if ((data.toString().trim() === 'start')) {
             console.log(`starting test`);
+            console.log(`Apollo URL(server.ts): ${process.env.PRODUCTION_GRAPHQL_URL}`);
             socket.write(`\n testing apollo sending...`);
             sendMachineResponse({
                 responses: [{
-                        globalInputId: "Yellow_cells",
+                        globalInputId: "Black_cells",
                         value: "33"
                     }],
                 branchId: "1919",
-                containerId: 1918,
+                containerId: 1913,
             });
         }
         buffer += data.toString("utf-8");

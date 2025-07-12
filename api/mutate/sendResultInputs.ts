@@ -8,6 +8,7 @@ import { RECORD_MACHINE_RESPONSE } from "../../graphql/mutations/recordMachineRe
 export const sendMachineResponse = async (
 	machineResponseInput: MachineResponseInput
 ) => {
+	// const tokenInput = process.env.TOKEN_INPUT;
 	const tokenInput = process.env.TOKEN_INPUT;
 	const result = await client.mutate<MachineResponse>({
 		mutation: RECORD_MACHINE_RESPONSE,
